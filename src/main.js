@@ -5,6 +5,25 @@ document.addEventListener("DOMContentLoaded",() => {
   
   const id = getUrlParameter("id");
   
+  //////////////////////////
+  var pusher = new Pusher('1877417d412f691c6e86', {
+    cluster: 'us2',
+    encrypted: true
+  });
+  
+  var channel = pusher.subscribe(id);
+  channel.bind('text-edit', (html) => {
+    debugger;
+    doc.innerHTML = html;
+  });
+  
+  function triggerChange(e) {
+    debugger;
+    channel.trigger('text-edit', e.target.innerHTML);
+  }
+  
+  doc.addEventListener('input', triggerChange);
+  ////////////////////
 });
 
 function getUniqueId () {
