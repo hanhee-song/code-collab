@@ -4,22 +4,19 @@ document.addEventListener("DOMContentLoaded",() => {
   doc.focus();
   
   const id = getUrlParameter("id");
+  if (!id) {
+    location.search = location.search ? '&id=' + getUniqueId() : 'id=' + getUniqueId();
+    return;
+  }
   
   //////////////////////////
-  var pusher = new Pusher('1877417d412f691c6e86', {
-    cluster: 'us2',
-    encrypted: true
-  });
-  
   var channel = pusher.subscribe(id);
-  channel.bind('text-edit', (html) => {
-    debugger;
+  channel.bind('client-text-edit', (html) => {
     doc.innerHTML = html;
   });
   
   function triggerChange(e) {
-    debugger;
-    channel.trigger('text-edit', e.target.innerHTML);
+    channel.trigger('client-text-edit', e.target.innerHTML);
   }
   
   doc.addEventListener('input', triggerChange);
@@ -33,6 +30,6 @@ function getUniqueId () {
 function getUrlParameter(name) {
   name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
   const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-  var results = regex.exec(location.search);
+  const results = regex.exec(location.search);
   return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
 }

@@ -1,0 +1,26 @@
+{
+  "name": "collaborate",
+  "version": "1.0.0",
+  "description": "[Live Site](https://hanhee-song.github.io/code-collab/)",
+  "main": "server.js",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "pusher": "^1.5.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hanhee-song/code-collab.git"
+  },
+  "author": "Hanhee Song",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hanhee-song/code-collab/issues"
+  },
+  "homepage": "https://github.com/hanhee-song/code-collab#readme"
+}
