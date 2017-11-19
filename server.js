@@ -1,6 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const Pusher = require('pusher');
+var livedb = require('livedb');
+var sharejs = require('share');
+
+var backend = livedb.client(livedb.memory());
+var share = require('share').server.createClient({backend: backend});
 
 const app = express();
 app.use(bodyParser.json());
@@ -8,9 +13,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(express.static('./'));
 
-const pusher = new Pusher('1877417d412f691c6e86', {
-  cluster: 'us2',
-  encrypted: true
+var pusher = new Pusher({
+  appId: '432996',
+  key: '1877417d412f691c6e86',
+  secret:  '54601b39b26bf225af62'
 });
 
 app.post('/pusher/auth', function(req, res) {
