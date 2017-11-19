@@ -2162,32 +2162,24 @@ document.addEventListener("DOMContentLoaded",() => {
   editor.setTheme("ace/theme/monokai");
   editor.getSession().setMode("ace/mode/javascript");
   editor.setValue("asdf");
+  editor.$blockScrolling = Infinity;
   
   
   let channel = pusher.subscribe(id);
   channel.bind('client-text-edit', (value) => {
     const currentValue = editor.getValue();
     if (currentValue !== value) {
+      const pos = editor.session.selection.toJSON();
       const patch = dmp.patch_make(currentValue, value);
       const result = dmp.patch_apply(patch, currentValue)[0];
       editor.setValue(result);
+      editor.session.selection.fromJSON(pos);
     }
   });
-  
-  // TODO: ADD MOUSE HANDLER TOO
-  // DON'T TRIGGER CHANGE IF EVENT DOESN'T RESULT IN CHANGE
-  
-  // document.addEventListener("keydown", (e) => {
-  //   setTimeout(function () {
-  //     channel.trigger('client-text-edit', editor.getValue());
-  //   }, 10);
-  // });
   
   editor.getSession().on('change', (e) => {
     if (editor.curOp && editor.curOp.command.name) {
       channel.trigger('client-text-edit', editor.getValue());
-    } else {
-      console.log("received change");
     }
   });
   ////////////////////
