@@ -5,6 +5,7 @@
   "main": "server.js",
   "dependencies": {
     "body-parser": "^1.18.2",
+    "diff_match_patch": "^0.1.1",
     "express": "^4.16.2",
     "pusher": "^1.5.1"
   },

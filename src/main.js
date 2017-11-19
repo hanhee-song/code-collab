@@ -1,3 +1,6 @@
+var dmpmod = require('diff_match_patch');
+var dmp = new dmpmod.diff_match_patch();
+
 document.addEventListener("DOMContentLoaded",() => {
   const doc = document.querySelector('.text-editor');
   doc.contentEditable = true;
@@ -17,7 +20,9 @@ document.addEventListener("DOMContentLoaded",() => {
   //////////////////////////
   var channel = pusher.subscribe(id);
   channel.bind('client-text-edit', (html) => {
-    doc.innerHTML = html;
+    const patch = dmp.patch_make(doc.innerHTML, html);
+    const result = dmp.patch_apply(patch, doc.innerHTML)[0];
+    doc.innerHTML = result;
   });
   
   function triggerChange(e) {
