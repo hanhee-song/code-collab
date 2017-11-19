@@ -2163,7 +2163,6 @@ document.addEventListener("DOMContentLoaded",() => {
   editor.getSession().setMode("ace/mode/javascript");
   editor.setValue("asdf");
   
-  let send = true;
   
   let channel = pusher.subscribe(id);
   channel.bind('client-text-edit', (value) => {
@@ -2172,23 +2171,25 @@ document.addEventListener("DOMContentLoaded",() => {
       const patch = dmp.patch_make(currentValue, value);
       const result = dmp.patch_apply(patch, currentValue)[0];
       editor.setValue(result);
-      send = false;
     }
   });
   
-  document.addEventListener("keyup", (e) => {
-    setTimeout(function () {
-      channel.trigger('client-text-edit', editor.getValue());
-    }, 10);
-  });
+  // TODO: ADD MOUSE HANDLER TOO
+  // DON'T TRIGGER CHANGE IF EVENT DOESN'T RESULT IN CHANGE
   
-  // editor.getSession().on('change', (e) => {
-  //   if (send) {
+  // document.addEventListener("keydown", (e) => {
+  //   setTimeout(function () {
   //     channel.trigger('client-text-edit', editor.getValue());
-  //   } else {
-  //     send = true;
-  //   }
+  //   }, 10);
   // });
+  
+  editor.getSession().on('change', (e) => {
+    if (editor.curOp && editor.curOp.command.name) {
+      channel.trigger('client-text-edit', editor.getValue());
+    } else {
+      console.log("received change");
+    }
+  });
   ////////////////////
 });
 
