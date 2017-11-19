@@ -1,4 +1,5 @@
 var dmpmod = require('diff_match_patch');
+var ace = require('ace-builds');
 var dmp = new dmpmod.diff_match_patch();
 
 document.addEventListener("DOMContentLoaded",() => {
@@ -25,12 +26,15 @@ document.addEventListener("DOMContentLoaded",() => {
     doc.innerHTML = result;
   });
   
-  function triggerChange(e) {
+  doc.addEventListener('input', (e) => {
+    console.log(this.selectionStart());
     channel.trigger('client-text-edit', e.target.innerHTML);
-  }
-  
-  doc.addEventListener('input', triggerChange);
+  });
   ////////////////////
+  
+  var editor = ace.edit("editor");
+  editor.setTheme("ace/theme/monokai");
+  editor.getSession().setMode("ace/mode/javascript");
 });
 
 function getUniqueId () {
