@@ -1,11 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const Pusher = require('pusher');
-var livedb = require('livedb');
-var sharejs = require('share');
-
-var backend = livedb.client(livedb.memory());
-var share = require('share').server.createClient({backend: backend});
 
 const app = express();
 app.use(bodyParser.json());
