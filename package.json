@@ -4,7 +4,6 @@
   "description": "[Live Site](https://hanhee-song.github.io/code-collab/)",
   "main": "server.js",
   "dependencies": {
-    "ace-builds": "^1.2.9",
     "body-parser": "^1.18.2",
     "diff_match_patch": "^0.1.1",
     "express": "^4.16.2",
