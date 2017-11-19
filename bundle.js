@@ -2163,33 +2163,32 @@ document.addEventListener("DOMContentLoaded",() => {
   editor.getSession().setMode("ace/mode/javascript");
   editor.setValue("asdf");
   
-  let moveArr = [];
-  let moveKey;
+  let send = true;
   
   let channel = pusher.subscribe(id);
-  channel.bind('client-text-edit', (res) => {
-    if (!moveArr.includes(res.moveKey)) {
-      const currentValue = editor.getValue();
-      if (currentValue !== res.value) {
-        moveKey = res.moveKey;
-        const patch = dmp.patch_make(currentValue, res.value);
-        const result = dmp.patch_apply(patch, currentValue)[0];
-        editor.setValue(result);
-      }
-    } else {
-      moveKey = null;
+  channel.bind('client-text-edit', (value) => {
+    const currentValue = editor.getValue();
+    if (currentValue !== value) {
+      const patch = dmp.patch_make(currentValue, value);
+      const result = dmp.patch_apply(patch, currentValue)[0];
+      editor.setValue(result);
+      send = false;
     }
   });
   
-  editor.getSession().on('change', (e) => {
-    moveKey = moveKey || Math.random();
-    moveArr.push(moveKey);
-    channel.trigger('client-text-edit',
-    {
-      moveKey,
-      value: editor.getValue(),
-    });
+  document.addEventListener("keyup", (e) => {
+    setTimeout(function () {
+      channel.trigger('client-text-edit', editor.getValue());
+    }, 10);
   });
+  
+  // editor.getSession().on('change', (e) => {
+  //   if (send) {
+  //     channel.trigger('client-text-edit', editor.getValue());
+  //   } else {
+  //     send = true;
+  //   }
+  // });
   ////////////////////
 });
 
