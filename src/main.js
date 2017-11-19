@@ -9,6 +9,11 @@ document.addEventListener("DOMContentLoaded",() => {
     return;
   }
   
+  const pusher = new Pusher('1877417d412f691c6e86', {
+    cluster: 'us2',
+    encrypted: true
+  });
+  
   //////////////////////////
   var channel = pusher.subscribe(id);
   channel.bind('client-text-edit', (html) => {
