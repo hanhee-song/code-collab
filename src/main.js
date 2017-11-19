@@ -1,5 +1,6 @@
 let dmpmod = require('diff_match_patch');
 let dmp = new dmpmod.diff_match_patch();
+let ace = require('ace');
 
 document.addEventListener("DOMContentLoaded",() => {
   const id = getUrlParameter("id");
