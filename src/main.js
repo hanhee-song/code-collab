@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded",() => {
   let editor = ace.edit("editor");
   editor.setTheme("ace/theme/monokai");
   editor.getSession().setMode("ace/mode/javascript");
-  editor.setValue("asdf");
   editor.$blockScrolling = Infinity;
   
   
@@ -36,6 +35,14 @@ document.addEventListener("DOMContentLoaded",() => {
     if (editor.curOp && editor.curOp.command.name) {
       channel.trigger('client-text-edit', editor.getValue());
     }
+  });
+  
+  channel.bind('client-text-receive', (e) => {
+    channel.trigger('client-text-edit', editor.getValue());
+  });
+  
+  channel.bind('pusher:subscription_succeeded', () => {
+    channel.trigger('client-text-receive', "asdf");
   });
   ////////////////////
 });
