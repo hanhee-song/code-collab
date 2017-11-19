@@ -2143,8 +2143,8 @@ exports['DIFF_INSERT'] = DIFF_INSERT;
 exports['DIFF_EQUAL'] = DIFF_EQUAL;
 
 },{}],2:[function(require,module,exports){
-var dmpmod = require('diff_match_patch');
-var dmp = new dmpmod.diff_match_patch();
+let dmpmod = require('diff_match_patch');
+let dmp = new dmpmod.diff_match_patch();
 
 document.addEventListener("DOMContentLoaded",() => {
   const id = getUrlParameter("id");
@@ -2158,23 +2158,37 @@ document.addEventListener("DOMContentLoaded",() => {
     encrypted: true
   });
   
-  var editor = ace.edit("editor");
+  let editor = ace.edit("editor");
   editor.setTheme("ace/theme/monokai");
   editor.getSession().setMode("ace/mode/javascript");
   editor.setValue("asdf");
-  //////////////////////////
-  var channel = pusher.subscribe(id);
-  channel.bind('client-text-edit', (value) => {
-    const currentValue = editor.getValue();
-    if (currentValue !== value) {
-      const patch = dmp.patch_make(currentValue, value);
-      const result = dmp.patch_apply(patch, currentValue)[0];
-      editor.setValue(result);
+  
+  let moveArr = [];
+  let moveKey;
+  
+  let channel = pusher.subscribe(id);
+  channel.bind('client-text-edit', (res) => {
+    if (!moveArr.includes(res.moveKey)) {
+      const currentValue = editor.getValue();
+      if (currentValue !== res.value) {
+        moveKey = res.moveKey;
+        const patch = dmp.patch_make(currentValue, res.value);
+        const result = dmp.patch_apply(patch, currentValue)[0];
+        editor.setValue(result);
+      }
+    } else {
+      moveKey = null;
     }
   });
   
-  editor.addEventListener('input', (e) => {
-    channel.trigger('client-text-edit', editor.getValue());
+  editor.getSession().on('change', (e) => {
+    moveKey = moveKey || Math.random();
+    moveArr.push(moveKey);
+    channel.trigger('client-text-edit',
+    {
+      moveKey,
+      value: editor.getValue(),
+    });
   });
   ////////////////////
 });
