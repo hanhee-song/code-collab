@@ -1,12 +1,7 @@
 var dmpmod = require('diff_match_patch');
-var ace = require('ace-builds');
 var dmp = new dmpmod.diff_match_patch();
 
 document.addEventListener("DOMContentLoaded",() => {
-  const doc = document.querySelector('.text-editor');
-  doc.contentEditable = true;
-  doc.focus();
-  
   const id = getUrlParameter("id");
   if (!id) {
     location.search = location.search ? '&id=' + getUniqueId() : 'id=' + getUniqueId();
@@ -18,23 +13,25 @@ document.addEventListener("DOMContentLoaded",() => {
     encrypted: true
   });
   
-  //////////////////////////
-  var channel = pusher.subscribe(id);
-  channel.bind('client-text-edit', (html) => {
-    const patch = dmp.patch_make(doc.innerHTML, html);
-    const result = dmp.patch_apply(patch, doc.innerHTML)[0];
-    doc.innerHTML = result;
-  });
-  
-  doc.addEventListener('input', (e) => {
-    console.log(this.selectionStart());
-    channel.trigger('client-text-edit', e.target.innerHTML);
-  });
-  ////////////////////
-  
   var editor = ace.edit("editor");
   editor.setTheme("ace/theme/monokai");
   editor.getSession().setMode("ace/mode/javascript");
+  editor.setValue("asdf");
+  //////////////////////////
+  var channel = pusher.subscribe(id);
+  channel.bind('client-text-edit', (value) => {
+    const currentValue = editor.getValue();
+    if (currentValue !== value) {
+      const patch = dmp.patch_make(currentValue, value);
+      const result = dmp.patch_apply(patch, currentValue)[0];
+      editor.setValue(result);
+    }
+  });
+  
+  editor.addEventListener('input', (e) => {
+    channel.trigger('client-text-edit', editor.getValue());
+  });
+  ////////////////////
 });
 
 function getUniqueId () {
