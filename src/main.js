@@ -23,12 +23,11 @@ document.addEventListener("DOMContentLoaded",() => {
   channel.bind('client-text-edit', (value) => {
     const currentValue = editor.getValue();
     if (currentValue !== value) {
-      // const selectedText = editor.getCopyText();
       const pos = editor.session.selection.toJSON();
       const arrValue = currentValue.split(/\n/);
-      // const left = arrValue.slice(0, pos.start.row + 1);
-      // left[left.length - 1] = left[left.length - 1].slice(0, pos.start.column);
       
+      // get the 32 characters to the right of the start/end of selection
+      // bitap alg has a 32 char limit
       const rightStart = arrValue.slice(pos.start.row);
       rightStart[0] = rightStart[0].slice(pos.start.column);
       const rightStartStr = rightStart.join("\n").slice(0, 31);
@@ -42,15 +41,16 @@ document.addEventListener("DOMContentLoaded",() => {
       // find new index (via whatever's to the right of the cursor)
       const newStartIndex = dmp.match_main(value, rightStartStr, oldStartIndex);
       const newEndIndex = dmp.match_main(value, rightEndStr, oldEndIndex);
-      // calculate new position based on index
       
+      // Apply patch
       const patch = dmp.patch_make(currentValue, value);
       const result = dmp.patch_apply(patch, currentValue)[0];
       editor.setValue(result);
       
-      // Adjust the selection json
+      // calculate new cursor position based on index
       const newStartPos = editor.session.doc.indexToPosition(newStartIndex);
       const newEndPos = editor.session.doc.indexToPosition(newEndIndex);
+      // Adjust the selection json
       pos.start = newStartPos;
       pos.end = newEndPos;
       editor.session.selection.fromJSON(pos);
