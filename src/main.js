@@ -24,9 +24,35 @@ document.addEventListener("DOMContentLoaded",() => {
     const currentValue = editor.getValue();
     if (currentValue !== value) {
       const pos = editor.session.selection.toJSON();
+      const arrValue = currentValue.split(/\n/);
+      
+      // get the 32 characters to the right of the start/end of selection
+      // bitap alg has a 32 char limit
+      const rightStart = arrValue.slice(pos.start.row);
+      rightStart[0] = rightStart[0].slice(pos.start.column);
+      const rightStartStr = rightStart.join("\n").slice(0, 31);
+      const rightEnd = arrValue.slice(pos.end.row);
+      rightEnd[0] = rightEnd[0].slice(pos.end.column);
+      const rightEndStr = rightEnd.join("\n").slice(0, 31);
+      
+      // Find current index
+      const oldStartIndex = editor.session.doc.positionToIndex(pos.start);
+      const oldEndIndex = editor.session.doc.positionToIndex(pos.end);
+      // find new index (via whatever's to the right of the cursor)
+      const newStartIndex = dmp.match_main(value, rightStartStr, oldStartIndex);
+      const newEndIndex = dmp.match_main(value, rightEndStr, oldEndIndex);
+      
+      // Apply patch
       const patch = dmp.patch_make(currentValue, value);
       const result = dmp.patch_apply(patch, currentValue)[0];
       editor.setValue(result);
+      
+      // calculate new cursor position based on index
+      const newStartPos = editor.session.doc.indexToPosition(newStartIndex);
+      const newEndPos = editor.session.doc.indexToPosition(newEndIndex);
+      // Adjust the selection json
+      pos.start = newStartPos;
+      pos.end = newEndPos;
       editor.session.selection.fromJSON(pos);
     }
   });
