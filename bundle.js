@@ -2168,10 +2168,31 @@ document.addEventListener("DOMContentLoaded",() => {
   channel.bind('client-text-edit', (value) => {
     const currentValue = editor.getValue();
     if (currentValue !== value) {
+      // const selectedText = editor.getCopyText();
       const pos = editor.session.selection.toJSON();
+      const arrValue = currentValue.split(/\n/);
+      const left = arrValue.slice(0, pos.start.row + 1);
+      left[left.length - 1] = left[left.length - 1].slice(0, pos.start.column);
+      
+      const right = arrValue.slice(pos.start.row);
+      right[0] = right[0].slice(pos.start.column);
+      
+      const rightStr = right.join("\n");
+      
+      // Find current index
+      const curIndex = editor.session.doc.positionToIndex(pos.start);
+      // find new index (via whatever's to the right of the cursor)
+      const newIndex = dmp.match_main(value, rightStr, curIndex);
+      // calculate new position based on index
+      
       const patch = dmp.patch_make(currentValue, value);
       const result = dmp.patch_apply(patch, currentValue)[0];
       editor.setValue(result);
+      
+      // Adjust the selection json
+      const newPos = editor.session.doc.indexToPosition(newIndex);
+      pos.start = newPos;
+      pos.end = newPos;
       editor.session.selection.fromJSON(pos);
     }
   });
