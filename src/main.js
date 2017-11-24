@@ -26,18 +26,22 @@ document.addEventListener("DOMContentLoaded",() => {
       // const selectedText = editor.getCopyText();
       const pos = editor.session.selection.toJSON();
       const arrValue = currentValue.split(/\n/);
-      const left = arrValue.slice(0, pos.start.row + 1);
-      left[left.length - 1] = left[left.length - 1].slice(0, pos.start.column);
+      // const left = arrValue.slice(0, pos.start.row + 1);
+      // left[left.length - 1] = left[left.length - 1].slice(0, pos.start.column);
       
-      const right = arrValue.slice(pos.start.row);
-      right[0] = right[0].slice(pos.start.column);
-      
-      const rightStr = right.join("\n");
+      const rightStart = arrValue.slice(pos.start.row);
+      rightStart[0] = rightStart[0].slice(pos.start.column);
+      const rightStartStr = rightStart.join("\n").slice(0, 31);
+      const rightEnd = arrValue.slice(pos.end.row);
+      rightEnd[0] = rightEnd[0].slice(pos.end.column);
+      const rightEndStr = rightEnd.join("\n").slice(0, 31);
       
       // Find current index
-      const curIndex = editor.session.doc.positionToIndex(pos.start);
+      const oldStartIndex = editor.session.doc.positionToIndex(pos.start);
+      const oldEndIndex = editor.session.doc.positionToIndex(pos.end);
       // find new index (via whatever's to the right of the cursor)
-      const newIndex = dmp.match_main(value, rightStr, curIndex);
+      const newStartIndex = dmp.match_main(value, rightStartStr, oldStartIndex);
+      const newEndIndex = dmp.match_main(value, rightEndStr, oldEndIndex);
       // calculate new position based on index
       
       const patch = dmp.patch_make(currentValue, value);
@@ -45,9 +49,10 @@ document.addEventListener("DOMContentLoaded",() => {
       editor.setValue(result);
       
       // Adjust the selection json
-      const newPos = editor.session.doc.indexToPosition(newIndex);
-      pos.start = newPos;
-      pos.end = newPos;
+      const newStartPos = editor.session.doc.indexToPosition(newStartIndex);
+      const newEndPos = editor.session.doc.indexToPosition(newEndIndex);
+      pos.start = newStartPos;
+      pos.end = newEndPos;
       editor.session.selection.fromJSON(pos);
     }
   });
