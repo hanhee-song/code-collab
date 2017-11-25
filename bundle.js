@@ -2440,10 +2440,7 @@ document.addEventListener("DOMContentLoaded",() => {
   
   // GENERATE COOKIE / CLIENT ID
   
-  // Cookies.remove(id);
-  
   let cookie = Cookies.getJSON(id);
-  console.log(cookie);
   let clientId;
   if (cookie) {
     clientId = cookie.clientId;
@@ -2544,7 +2541,7 @@ document.addEventListener("DOMContentLoaded",() => {
 });
 
 function getUniqueId () {
-  return Math.random().toString(36).substr(2, 9);
+  return 'private-' + Math.random().toString(36).substr(2, 9);
 }
 
 function getUrlParameter(name) {
