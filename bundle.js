@@ -2216,7 +2216,10 @@ document.addEventListener("DOMContentLoaded",() => {
       editor.session.selection.fromJSON(pos);
     }
     
-    // update other cursor position
+    updateOtherCursor(otherPos);
+  }
+  
+  function updateOtherCursor(otherPos) {
     let otherCursor = document.querySelector(`.other-cursor.${clientId}`);
     // if otherPos is null, delete cursor
     if (otherCursor && !otherPos) {
@@ -2230,38 +2233,42 @@ document.addEventListener("DOMContentLoaded",() => {
       otherCursor.style.top = otherPos.end.row * 16 + 'px';
       otherCursor.style.left = otherPos.end.column * 7.2 + 4 + 'px';
       
-      // delete other cursor selection
-      let selection = document.querySelector(`.other-cursor-selection.${clientId}`);
-      while (selection) {
-        selection.parentNode.removeChild(selection);
-        selection = document.querySelector(`.other-cursor-selection.${clientId}`);
+      updateOtherSelection(otherPos);
+    }
+  }
+  
+  function updateOtherSelection(otherPos) {
+    // delete other selection
+    let selection = document.querySelector(`.other-cursor-selection.${clientId}`);
+    while (selection) {
+      selection.parentNode.removeChild(selection);
+      selection = document.querySelector(`.other-cursor-selection.${clientId}`);
+    }
+    
+    // update other selection
+    if (otherPos.start.row !== otherPos.end.row || otherPos.start.column !== otherPos.end.column) {
+      let topPos;
+      let botPos;
+      if (otherPos.start.row * 10000 + otherPos.start.column < otherPos.end.row * 10000 + otherPos.end.column) {
+        topPos = otherPos.start;
+        botPos = otherPos.end;
+      } else {
+        topPos = otherPos.end;
+        botPos = otherPos.start;
       }
       
-      // update other cursor selection
-      if (otherPos.start.row !== otherPos.end.row || otherPos.start.column !== otherPos.end.column) {
-        let topPos;
-        let botPos;
-        if (otherPos.start.row * 10000 + otherPos.start.column < otherPos.end.row * 10000 + otherPos.end.column) {
-          topPos = otherPos.start;
-          botPos = otherPos.end;
+      for (var i = topPos.row; i <= botPos.row; i++) {
+        selection = document.createElement("div");
+        selection.className = `other-cursor-selection ${clientId}`;
+        selection.style.top = i * 16 + 'px';
+        selection.style.left = i === topPos.row ? 5 + topPos.column * 7.2 + 'px' : '4px';
+        if (i === botPos.row) {
+          const width = i === topPos.row ? botPos.column - topPos.column : botPos.column;
+          selection.style.width = width * 7.2 + 'px';
         } else {
-          topPos = otherPos.end;
-          botPos = otherPos.start;
+          selection.style.right = 0;
         }
-        
-        for (var i = topPos.row; i <= botPos.row; i++) {
-          selection = document.createElement("div");
-          selection.className = `other-cursor-selection ${clientId}`;
-          selection.style.top = i * 16 + 'px';
-          selection.style.left = i === topPos.row ? 4 + topPos.column * 7.2 + 'px' : '4px';
-          if (i === botPos.row) {
-            selection.style.width = (botPos.column - topPos.column) * 7.2 + 'px';
-          } else {
-            selection.style.right = 0;
-          }
-          console.log(selection);
-          document.querySelector(".ace_scroller").appendChild(selection);
-        }
+        document.querySelector(".ace_scroller").appendChild(selection);
       }
     }
   }
@@ -2282,12 +2289,11 @@ document.addEventListener("DOMContentLoaded",() => {
   let oldVal = editor.getValue();
   
   editorEl.addEventListener("click", () => {
+    // TODO: THIS DOESN'T TRIGGER WHEN MOUSE RELEASED OUTSIDE OF WINDOW
     setTimeout(function () {
       triggerChange();
     }, 0);
   });
-  
-  // TODO: SHOW ENTIRE SELECTION
   
   document.addEventListener("keyup", (e) => {
     const newVal = editor.getValue();
