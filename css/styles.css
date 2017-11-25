@@ -58,7 +58,7 @@ table {
 }
 
 .other-cursor-selection {
-  height: 16px;
+  height: 1em;
   background-color: #0d5;
   position: absolute;
   z-index: 99;
@@ -68,7 +68,7 @@ table {
 }
 
 .other-cursor {
-  height: 16px;
+  height: 1em;
   width: 1px;
   background-color: #0d5;
   position: absolute;
