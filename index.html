@@ -5,10 +5,16 @@
     <title>Collaborate</title>
     <link rel="stylesheet" href="css/styles.css">
     <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
+    <script src="https://simplewebrtc.com/latest-v2.js"></script>
   </head>
   <body>
     <div id="editor">
       
+    </div>
+    
+    <div id="video-wrapper">
+      <video height="300" id="localVideo"></video>
+      <div id="remotesVideos"></div>
     </div>
     
     <script src="ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>

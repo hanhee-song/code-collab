@@ -2438,7 +2438,7 @@ document.addEventListener("DOMContentLoaded",() => {
   editor.$blockScrolling = Infinity;
   const editorEl = document.querySelector("#editor");
   
-  // GENERATE COOKIE / CLIENT ID
+  // GENERATE COOKIE / CLIENT ID =================
   
   let cookie = Cookies.getJSON(id);
   let clientId;
@@ -2537,6 +2537,18 @@ document.addEventListener("DOMContentLoaded",() => {
       clientId: clientId,
       text: editor.getValue(),
     });
+  });
+  
+  // WEB VIDEO ======================================
+  
+  var webrtc = new SimpleWebRTC({
+    localVideoEl: 'localVideo',
+    remoteVideosEl: 'remotesVideos',
+    autoRequestMedia: true
+  });
+  
+  webrtc.on('readyToCall', () => {
+    webrtc.joinRoom(`codecollab-${id}`);
   });
 });
 
