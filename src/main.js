@@ -1,5 +1,5 @@
-const clientId = getUniqueId();
 const updateEditor = require('./editor');
+const Cookies = require('js-cookie');
 
 document.addEventListener("DOMContentLoaded",() => {
   
@@ -17,9 +17,27 @@ document.addEventListener("DOMContentLoaded",() => {
   editor.$blockScrolling = Infinity;
   const editorEl = document.querySelector("#editor");
   
-  // TODO: GENERATE COOKIE ========================
+  // GENERATE COOKIE / CLIENT ID
   
-  // Cookies.set('name', 'value', { expires: 7, path: '' });
+  // Cookies.remove(id);
+  
+  let cookie = Cookies.getJSON(id);
+  console.log(cookie);
+  let clientId;
+  if (cookie) {
+    clientId = cookie.clientId;
+    if (cookie.text) {
+      const pos = editor.session.selection.toJSON();
+      editor.setValue(cookie.text);
+      editor.session.selection.fromJSON(pos);
+    }
+  } else {
+    clientId = getUniqueId();
+    Cookies.set(id, {
+      clientId: clientId,
+      text: editor.getValue(),
+    });
+  }
   
   // GENERATE PUSHER CONNECTION ==================
   
@@ -82,10 +100,12 @@ document.addEventListener("DOMContentLoaded",() => {
   });
   
   channel.bind('pusher:subscription_succeeded', () => {
-    channel.trigger('client-text-receive', "asdf");
+    setTimeout(function () {
+      channel.trigger('client-text-receive', "asdf");
+    }, 0);
   });
   
-  // SEND CLOSE SIGNAL ON CLOSE =========================
+  // SEND CLOSE SIGNAL AND SAVE ON CLOSE =================
   
   window.addEventListener("beforeunload", () => {
     const data = {
@@ -94,6 +114,11 @@ document.addEventListener("DOMContentLoaded",() => {
       otherPos: null,
     };
     channel.trigger('client-text-edit', data);
+    
+    Cookies.set(id, {
+      clientId: clientId,
+      text: editor.getValue(),
+    });
   });
 });
 
