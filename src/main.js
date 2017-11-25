@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded",() => {
   
   // TODO: GENERATE COOKIE ========================
   
-  
+  // Cookies.set('name', 'value', { expires: 7, path: '' });
   
   // GENERATE PUSHER CONNECTION ==================
   
@@ -72,13 +72,18 @@ document.addEventListener("DOMContentLoaded",() => {
     
     // update cursor position
     let otherCursor = document.querySelector(`.other-cursor.${clientId}`);
-    if (!otherCursor) {
-      otherCursor = document.createElement("div");
-      otherCursor.className = `other-cursor ${clientId}`;
-      document.querySelector(".ace_scroller").appendChild(otherCursor);
+    // if otherPos is null, delete cursor
+    if (otherCursor && !otherPos) {
+      otherCursor.parentNode.removeChild(otherCursor);
+    } else if (otherPos) {
+      if (!otherCursor) {
+        otherCursor = document.createElement("div");
+        otherCursor.className = `other-cursor ${clientId}`;
+        document.querySelector(".ace_scroller").appendChild(otherCursor);
+      }
+      otherCursor.style.top = otherPos.end.row * 16 + 'px';
+      otherCursor.style.left = otherPos.end.column * 7.2 + 4 + 'px';
     }
-    otherCursor.style.top = otherPos.end.row * 16 + 'px';
-    otherCursor.style.left = otherPos.end.column * 7.2 + 4 + 'px';
   });
   
   // CHANGE HANDLER ==================================
@@ -103,6 +108,8 @@ document.addEventListener("DOMContentLoaded",() => {
     }, 0);
   });
   
+  // TODO: SHOW ENTIRE SELECTION
+  
   document.addEventListener("keyup", (e) => {
     const newVal = editor.getValue();
     const newPos = editor.session.selection.toJSON();
@@ -113,7 +120,7 @@ document.addEventListener("DOMContentLoaded",() => {
     oldVal = newVal;
   });
   
-  function triggerChange(e) {
+  function triggerChange() {
     const data = {
       clientId: clientId,
       value: editor.getValue(),
@@ -131,7 +138,18 @@ document.addEventListener("DOMContentLoaded",() => {
   channel.bind('pusher:subscription_succeeded', () => {
     channel.trigger('client-text-receive', "asdf");
   });
-  ////////////////////
+  
+  // SEND CLOSE SIGNAL ON CLOSE =========================
+  
+  console.log(window);
+  window.addEventListener("beforeunload", () => {
+    const data = {
+      clientId: clientId,
+      value: editor.getValue(),
+      otherPos: null,
+    };
+    channel.trigger('client-text-edit', data);
+  });
 });
 
 function getUniqueId () {
