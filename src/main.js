@@ -31,12 +31,13 @@ document.addEventListener("DOMContentLoaded",() => {
   
   const channel = pusher.subscribe(id);
   
-  channel.bind('client-text-edit', ({ clientId, value, otherPos }) => {
+  channel.bind('client-text-edit', (data) => {
+    updateEditor(data);
+  });
+  
+  function updateEditor({ clientId, value, otherPos }) {
     const currentValue = editor.getValue();
     if (currentValue !== value) {
-      
-      // TODO: REFACTOR OUT ======================
-      
       const pos = editor.session.selection.toJSON();
       const arrValue = currentValue.split(/\n/);
       
@@ -84,7 +85,7 @@ document.addEventListener("DOMContentLoaded",() => {
       otherCursor.style.top = otherPos.end.row * 16 + 'px';
       otherCursor.style.left = otherPos.end.column * 7.2 + 4 + 'px';
     }
-  });
+  }
   
   // CHANGE HANDLER ==================================
   
@@ -102,7 +103,6 @@ document.addEventListener("DOMContentLoaded",() => {
   let oldVal = editor.getValue();
   
   editorEl.addEventListener("click", () => {
-    console.log("click");
     setTimeout(function () {
       triggerChange();
     }, 0);
@@ -141,7 +141,6 @@ document.addEventListener("DOMContentLoaded",() => {
   
   // SEND CLOSE SIGNAL ON CLOSE =========================
   
-  console.log(window);
   window.addEventListener("beforeunload", () => {
     const data = {
       clientId: clientId,
