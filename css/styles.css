@@ -1,14 +1,17 @@
-.text-editor {
-  height: 500px;
-  width: 500px;
-  border: 1px solid red;
-  font-family: "Inconsolata", sans-serif;
-}
-
 #editor {
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
+  left: 0;
+}
+
+.other-cursor {
+  height: 16px;
+  width: 1px;
+  background-color: #0d5;
+  position: absolute;
+  z-index: 100;
+  top: 0;
   left: 0;
 }

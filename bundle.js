@@ -2143,8 +2143,9 @@ exports['DIFF_INSERT'] = DIFF_INSERT;
 exports['DIFF_EQUAL'] = DIFF_EQUAL;
 
 },{}],2:[function(require,module,exports){
-let dmpmod = require('diff_match_patch');
-let dmp = new dmpmod.diff_match_patch();
+const dmpmod = require('diff_match_patch');
+const dmp = new dmpmod.diff_match_patch();
+const clientId = getUniqueId();
 
 document.addEventListener("DOMContentLoaded",() => {
   const id = getUrlParameter("id");
@@ -2158,14 +2159,15 @@ document.addEventListener("DOMContentLoaded",() => {
     encrypted: true
   });
   
-  let editor = ace.edit("editor");
+  const editor = ace.edit("editor");
   editor.setTheme("ace/theme/monokai");
   editor.getSession().setMode("ace/mode/javascript");
   editor.$blockScrolling = Infinity;
+  const editorEl = document.querySelector("#editor");
   
+  const channel = pusher.subscribe(id);
   
-  let channel = pusher.subscribe(id);
-  channel.bind('client-text-edit', (value) => {
+  channel.bind('client-text-edit', ({ clientId, value, otherPos }) => {
     const currentValue = editor.getValue();
     if (currentValue !== value) {
       const pos = editor.session.selection.toJSON();
@@ -2200,17 +2202,60 @@ document.addEventListener("DOMContentLoaded",() => {
       pos.end = newEndPos;
       editor.session.selection.fromJSON(pos);
     }
+    
+    // update cursor position
+    let otherCursor = document.querySelector(`.other-cursor.${clientId}`);
+    if (!otherCursor) {
+      otherCursor = document.createElement("div");
+      otherCursor.className = `other-cursor ${clientId}`;
+      document.querySelector(".ace_scroller").appendChild(otherCursor);
+    }
+    otherCursor.style.top = otherPos.end.row * 16 + 'px';
+    otherCursor.style.left = otherPos.end.column * 7.2 + 4 + 'px';
   });
   
-  editor.getSession().on('change', (e) => {
+  editor.getSession().on('change', () => {
     if (editor.curOp && editor.curOp.command.name) {
-      channel.trigger('client-text-edit', editor.getValue());
+      setTimeout(() => {
+        triggerChange();
+      }, 0);
     }
   });
   
-  channel.bind('client-text-receive', (e) => {
-    channel.trigger('client-text-edit', editor.getValue());
+  // CURSOR HANDLERS - SHOULD NOT RESPOND TO VALUE CHANGES ====
+  
+  editorEl.addEventListener("click", () => {
+    console.log("click");
+    setTimeout(function () {
+      triggerChange();
+    }, 0);
   });
+  
+  let oldPos = editor.session.selection.toJSON();
+  let oldVal = editor.getValue();
+  
+  document.addEventListener("keyup", (e) => {
+    const newVal = editor.getValue();
+    const newPos = editor.session.selection.toJSON();
+    if (oldVal === newVal && JSON.stringify(oldPos) !== JSON.stringify(newPos)) {
+      triggerChange();
+    }
+    oldPos = newPos;
+    oldVal = newVal;
+  });
+  
+  channel.bind('client-text-receive', () => {
+    triggerChange();
+  });
+  
+  function triggerChange(e) {
+    const data = {
+      clientId: clientId,
+      value: editor.getValue(),
+      otherPos: editor.session.selection.toJSON(),
+    };
+    channel.trigger('client-text-edit', data);
+  }
   
   channel.bind('pusher:subscription_succeeded', () => {
     channel.trigger('client-text-receive', "asdf");
