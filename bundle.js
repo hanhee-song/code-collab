@@ -2216,35 +2216,41 @@ document.addEventListener("DOMContentLoaded",() => {
       editor.session.selection.fromJSON(pos);
     }
     
-    updateOtherCursor(otherPos);
-  }
-  
-  function updateOtherCursor(otherPos) {
-    let otherCursor = document.querySelector(`.other-cursor.${clientId}`);
-    // if otherPos is null, delete cursor
-    if (otherCursor && !otherPos) {
-      otherCursor.parentNode.removeChild(otherCursor);
-    } else if (otherPos) {
-      if (!otherCursor) {
-        otherCursor = document.createElement("div");
-        otherCursor.className = `other-cursor ${clientId}`;
-        document.querySelector(".ace_scroller").appendChild(otherCursor);
-      }
-      otherCursor.style.top = otherPos.end.row * 16 + 'px';
-      otherCursor.style.left = otherPos.end.column * 7.2 + 4 + 'px';
-      
-      updateOtherSelection(otherPos);
+    // always clear selection
+    clearOtherSelection(clientId);
+    if (otherPos) {
+      updateOtherCursor(otherPos, clientId);
+      updateOtherSelection(otherPos, clientId);
+    } else {
+      clearOtherCursor(clientId);
     }
   }
   
-  function updateOtherSelection(otherPos) {
-    // delete other selection
+  function clearOtherSelection(clientId) {
     let selection = document.querySelector(`.other-cursor-selection.${clientId}`);
     while (selection) {
       selection.parentNode.removeChild(selection);
       selection = document.querySelector(`.other-cursor-selection.${clientId}`);
     }
-    
+  }
+  
+  function clearOtherCursor(clientId) {
+    let otherCursor = document.querySelector(`.other-cursor.${clientId}`);
+    otherCursor.parentNode.removeChild(otherCursor);
+  }
+  
+  function updateOtherCursor(otherPos, clientId) {
+    let otherCursor = document.querySelector(`.other-cursor.${clientId}`);
+    if (!otherCursor) {
+      otherCursor = document.createElement("div");
+      otherCursor.className = `other-cursor ${clientId}`;
+      document.querySelector(".ace_scroller").appendChild(otherCursor);
+    }
+    otherCursor.style.top = otherPos.end.row * 16 + 'px';
+    otherCursor.style.left = otherPos.end.column * 7.2 + 4 + 'px';
+  }
+  
+  function updateOtherSelection(otherPos, clientId) {
     // update other selection
     if (otherPos.start.row !== otherPos.end.row || otherPos.start.column !== otherPos.end.column) {
       let topPos;
@@ -2257,6 +2263,7 @@ document.addEventListener("DOMContentLoaded",() => {
         botPos = otherPos.start;
       }
       
+      let selection;
       for (var i = topPos.row; i <= botPos.row; i++) {
         selection = document.createElement("div");
         selection.className = `other-cursor-selection ${clientId}`;
