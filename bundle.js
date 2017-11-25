@@ -2221,7 +2221,6 @@ function updateOtherCursor(otherPos, clientId) {
 }
 
 function updateOtherSelection(otherPos, clientId) {
-  // update other selection
   if (otherPos.start.row !== otherPos.end.row || otherPos.start.column !== otherPos.end.column) {
     let topPos;
     let botPos;
@@ -2353,7 +2352,7 @@ document.addEventListener("DOMContentLoaded",() => {
 });
 
 function getUniqueId () {
-  return 'private-' + Math.random().toString(36).substr(2, 9);
+  return Math.random().toString(36).substr(2, 9);
 }
 
 function getUrlParameter(name) {

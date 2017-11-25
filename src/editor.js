@@ -76,7 +76,6 @@ function updateOtherCursor(otherPos, clientId) {
 }
 
 function updateOtherSelection(otherPos, clientId) {
-  // update other selection
   if (otherPos.start.row !== otherPos.end.row || otherPos.start.column !== otherPos.end.column) {
     let topPos;
     let botPos;
