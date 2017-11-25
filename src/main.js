@@ -3,16 +3,14 @@ const dmp = new dmpmod.diff_match_patch();
 const clientId = getUniqueId();
 
 document.addEventListener("DOMContentLoaded",() => {
+  
+  // GENERATE URL && EDITOR ====================
+  
   const id = getUrlParameter("id");
   if (!id) {
     location.search = location.search ? '&id=' + getUniqueId() : 'id=' + getUniqueId();
     return;
   }
-  
-  const pusher = new Pusher('1877417d412f691c6e86', {
-    cluster: 'us2',
-    encrypted: true
-  });
   
   const editor = ace.edit("editor");
   editor.setTheme("ace/theme/monokai");
@@ -20,11 +18,25 @@ document.addEventListener("DOMContentLoaded",() => {
   editor.$blockScrolling = Infinity;
   const editorEl = document.querySelector("#editor");
   
+  // TODO: GENERATE COOKIE ========================
+  
+  
+  
+  // GENERATE PUSHER CONNECTION ==================
+  
+  const pusher = new Pusher('1877417d412f691c6e86', {
+    cluster: 'us2',
+    encrypted: true
+  });
+  
   const channel = pusher.subscribe(id);
   
   channel.bind('client-text-edit', ({ clientId, value, otherPos }) => {
     const currentValue = editor.getValue();
     if (currentValue !== value) {
+      
+      // TODO: REFACTOR OUT ======================
+      
       const pos = editor.session.selection.toJSON();
       const arrValue = currentValue.split(/\n/);
       
@@ -69,6 +81,8 @@ document.addEventListener("DOMContentLoaded",() => {
     otherCursor.style.left = otherPos.end.column * 7.2 + 4 + 'px';
   });
   
+  // CHANGE HANDLER ==================================
+  
   editor.getSession().on('change', () => {
     if (editor.curOp && editor.curOp.command.name) {
       setTimeout(() => {
@@ -79,15 +93,15 @@ document.addEventListener("DOMContentLoaded",() => {
   
   // CURSOR HANDLERS - SHOULD NOT RESPOND TO VALUE CHANGES ====
   
+  let oldPos = editor.session.selection.toJSON();
+  let oldVal = editor.getValue();
+  
   editorEl.addEventListener("click", () => {
     console.log("click");
     setTimeout(function () {
       triggerChange();
     }, 0);
   });
-  
-  let oldPos = editor.session.selection.toJSON();
-  let oldVal = editor.getValue();
   
   document.addEventListener("keyup", (e) => {
     const newVal = editor.getValue();
@@ -99,10 +113,6 @@ document.addEventListener("DOMContentLoaded",() => {
     oldVal = newVal;
   });
   
-  channel.bind('client-text-receive', () => {
-    triggerChange();
-  });
-  
   function triggerChange(e) {
     const data = {
       clientId: clientId,
@@ -111,6 +121,12 @@ document.addEventListener("DOMContentLoaded",() => {
     };
     channel.trigger('client-text-edit', data);
   }
+  
+  // INITIAL REQUEST ON LOAD ============================
+  
+  channel.bind('client-text-receive', () => {
+    triggerChange();
+  });
   
   channel.bind('pusher:subscription_succeeded', () => {
     channel.trigger('client-text-receive', "asdf");
