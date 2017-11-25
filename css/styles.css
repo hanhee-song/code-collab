@@ -6,6 +6,16 @@
   left: 0;
 }
 
+.other-cursor-selection {
+  height: 16px;
+  background-color: #0d5;
+  position: absolute;
+  z-index: 99;
+  opacity: .2;
+  top: 0;
+  left: 0;
+}
+
 .other-cursor {
   height: 16px;
   width: 1px;

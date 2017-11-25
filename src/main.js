@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded",() => {
       editor.session.selection.fromJSON(pos);
     }
     
-    // update cursor position
+    // update other cursor position
     let otherCursor = document.querySelector(`.other-cursor.${clientId}`);
     // if otherPos is null, delete cursor
     if (otherCursor && !otherPos) {
@@ -84,6 +84,40 @@ document.addEventListener("DOMContentLoaded",() => {
       }
       otherCursor.style.top = otherPos.end.row * 16 + 'px';
       otherCursor.style.left = otherPos.end.column * 7.2 + 4 + 'px';
+      
+      // delete other cursor selection
+      let selection = document.querySelector(`.other-cursor-selection.${clientId}`);
+      while (selection) {
+        selection.parentNode.removeChild(selection);
+        selection = document.querySelector(`.other-cursor-selection.${clientId}`);
+      }
+      
+      // update other cursor selection
+      if (otherPos.start.row !== otherPos.end.row || otherPos.start.column !== otherPos.end.column) {
+        let topPos;
+        let botPos;
+        if (otherPos.start.row * 10000 + otherPos.start.column < otherPos.end.row * 10000 + otherPos.end.column) {
+          topPos = otherPos.start;
+          botPos = otherPos.end;
+        } else {
+          topPos = otherPos.end;
+          botPos = otherPos.start;
+        }
+        
+        for (var i = topPos.row; i <= botPos.row; i++) {
+          selection = document.createElement("div");
+          selection.className = `other-cursor-selection ${clientId}`;
+          selection.style.top = i * 16 + 'px';
+          selection.style.left = i === topPos.row ? 4 + topPos.column * 7.2 + 'px' : '4px';
+          if (i === botPos.row) {
+            selection.style.width = (botPos.column - topPos.column) * 7.2 + 'px';
+          } else {
+            selection.style.right = 0;
+          }
+          console.log(selection);
+          document.querySelector(".ace_scroller").appendChild(selection);
+        }
+      }
     }
   }
   
