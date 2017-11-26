@@ -49,6 +49,22 @@ function updateEditor({ clientId, value, otherPos }) {
   }
 }
 
+let scale;
+
+function getScale() {
+  const cursor = document.querySelector('.ace_cursor');
+  if (cursor) {
+    const height = cursor.clientHeight;
+    scale = height;
+  } else {
+    setTimeout(function () {
+      getScale();
+    }, 50);
+  }
+}
+
+getScale();
+
 function clearOtherSelection(clientId) {
   let selection = document.querySelector(`.other-cursor-selection.${clientId}`);
   while (selection) {
@@ -71,8 +87,9 @@ function updateOtherCursor(otherPos, clientId) {
     otherCursor.className = `other-cursor ${clientId}`;
     document.querySelector(".ace_scroller").appendChild(otherCursor);
   }
-  otherCursor.style.top = otherPos.end.row * 16 + 'px';
-  otherCursor.style.left = otherPos.end.column * 7.2 + 4 + 'px';
+  otherCursor.style.top = otherPos.end.row * scale + 'px';
+  otherCursor.style.height = scale + 'px';
+  otherCursor.style.left = otherPos.end.column * scale * .45 + 4 + 'px';
 }
 
 function updateOtherSelection(otherPos, clientId) {
@@ -91,11 +108,11 @@ function updateOtherSelection(otherPos, clientId) {
     for (var i = topPos.row; i <= botPos.row; i++) {
       selection = document.createElement("div");
       selection.className = `other-cursor-selection ${clientId}`;
-      selection.style.top = i * 16 + 'px';
-      selection.style.left = i === topPos.row ? 5 + topPos.column * 7.2 + 'px' : '4px';
+      selection.style.top = i * scale + 'px';
+      selection.style.left = i === topPos.row ? 5 + topPos.column * scale * .45 + 'px' : '4px';
       if (i === botPos.row) {
         const width = i === topPos.row ? botPos.column - topPos.column : botPos.column;
-        selection.style.width = width * 7.2 + 'px';
+        selection.style.width = width * scale * .45 + 'px';
       } else {
         selection.style.right = 0;
       }
