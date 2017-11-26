@@ -1,5 +1,7 @@
-const updateEditor = require('./editor');
 const Cookies = require('js-cookie');
+const dmpmod = require('diff_match_patch');
+const dmp = new dmpmod.diff_match_patch();
+const updateEditor = require('./editor');
 
 document.addEventListener("DOMContentLoaded", () => {
   
@@ -49,25 +51,32 @@ document.addEventListener("DOMContentLoaded", () => {
     updateEditor(data);
   });
   
-  // CHANGE HANDLER ==================================
-  
-  editor.getSession().on('change', () => {
-    if (editor.curOp && editor.curOp.command.name) {
-      setTimeout(() => {
-        triggerChange();
-      }, 0);
-    }
-  });
-  
-  // CURSOR HANDLERS - SHOULD NOT RESPOND TO VALUE CHANGES ====
+  // CHANGE / CURSOR HANDLERS ===========================
   
   let oldPos = editor.session.selection.toJSON();
   let oldVal = editor.getValue();
   
+  editor.getSession().on('change', () => {
+    const newPos = editor.session.selection.toJSON();
+    if (editor.curOp && editor.curOp.command.name) {
+      setTimeout(() => {
+        sendPatch();
+      }, 0);
+    } else if (JSON.stringify(oldPos) !== JSON.stringify(newPos)) {
+      // triggers if change from incoming data causes change in pos
+      setTimeout(() => {
+        // BUG
+        // THIS SHOULD ONLY UPDATE CURSOR BUT IS UPDATING EVERYTHING
+        sendCursor();
+      }, 0);
+      oldPos = newPos;
+    }
+  });
+  
   editorEl.addEventListener("click", () => {
     // TODO: THIS DOESN'T TRIGGER WHEN MOUSE RELEASED OUTSIDE OF WINDOW
     setTimeout(function () {
-      triggerChange();
+      sendPatch();
     }, 0);
   });
   
@@ -75,17 +84,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const newVal = editor.getValue();
     const newPos = editor.session.selection.toJSON();
     if (oldVal === newVal && JSON.stringify(oldPos) !== JSON.stringify(newPos)) {
-      triggerChange();
+      sendPatch();
     }
     oldPos = newPos;
-    oldVal = newVal;
   });
   
-  function triggerChange() {
+  function sendPatch() {
+    const newVal = editor.getValue();
     const data = {
       clientId: clientId,
       value: editor.getValue(),
+      patch: dmp.patch_make(oldVal, newVal),
       otherPos: editor.session.selection.toJSON(),
+      actionType: "PATCH",
+    };
+    oldVal = newVal;
+    channel.trigger('client-text-edit', data);
+  }
+  
+  function sendCursor() {
+    const newVal = editor.getValue();
+    const data = {
+      clientId: clientId,
+      value: "", // if these cause an error,
+      patch: "", // you're doing something wrong
+      otherPos: editor.session.selection.toJSON(),
+      actionType: "CURSOR",
     };
     channel.trigger('client-text-edit', data);
   }
@@ -93,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // INITIAL REQUEST ON LOAD ============================
   
   channel.bind('client-text-receive', () => {
-    triggerChange();
+    sendPatch();
   });
   
   channel.bind('pusher:subscription_succeeded', () => {
@@ -108,7 +132,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = {
       clientId: clientId,
       value: editor.getValue(),
+      patch: dmp.patch_make(oldVal, editor.getValue()),
       otherPos: null,
+      actionType: "REPLACE",
     };
     channel.trigger('client-text-edit', data);
     

@@ -104,10 +104,10 @@ table {
 }
 
 #remoteVideos video {
-  width: 100%;
+  /*width: 100%;*/
 }
 
-.vsc-initialized {
+/*.vsc-initialized {
   width: 100%;
   height: 100%;
-}
+}*/
