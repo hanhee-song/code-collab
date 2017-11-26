@@ -96,9 +96,15 @@ table {
   height: 50%;
 }
 
-#remotesVideos {
+#remoteVideos {
   width: 100%;
   height: 50%;
+  display: flex;
+  flex-direction: column;
+}
+
+#remoteVideos video {
+  width: 100%;
 }
 
 .vsc-initialized {

@@ -2439,7 +2439,7 @@ module.exports = updateEditor;
 const updateEditor = require('./editor');
 const Cookies = require('js-cookie');
 
-document.addEventListener("DOMContentLoaded",() => {
+document.addEventListener("DOMContentLoaded", () => {
   
   // GENERATE URL && EDITOR ====================
   
@@ -2452,7 +2452,6 @@ document.addEventListener("DOMContentLoaded",() => {
   const editor = ace.edit("editor");
   editor.setTheme("ace/theme/monokai");
   editor.getSession().setMode("ace/mode/javascript");
-  // editor.setFontSize(16);
   editor.$blockScrolling = Infinity;
   const editorEl = document.querySelector("#editor");
   
@@ -2561,7 +2560,7 @@ document.addEventListener("DOMContentLoaded",() => {
   
   var webrtc = new SimpleWebRTC({
     localVideoEl: 'localVideo',
-    remoteVideosEl: 'remotesVideos',
+    remoteVideosEl: 'remoteVideos',
     autoRequestMedia: true
   });
   
