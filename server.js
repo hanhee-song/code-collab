@@ -1,11 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const Pusher = require('pusher');
+const sslRedirect = require('heroku-ssl-redirect');
 
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+app.use(sslRedirect());
 app.use(express.static('./'));
 
 var pusher = new Pusher({
