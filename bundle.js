@@ -2513,9 +2513,26 @@ document.addEventListener("DOMContentLoaded", () => {
   const channel = pusher.subscribe(id);
   
   channel.bind('client-text-edit', (data) => {
-    updateEditor(data);
-    if (data.actionType === "REPLACE") {
-      oldVal = data.value;
+    function waitUpdate() {
+      if (sendingPatch || sendingCursor) {
+        setTimeout(() => {
+          waitUpdate();
+        }, 10);
+      } else {
+        updateEditor(data);
+        setTimeout(() => {
+          oldVal = editor.getValue();
+        }, 0);
+      }
+    }
+    
+    if (data.actionType === "PATCH") {
+      waitUpdate();
+    } else {
+      updateEditor(data);
+      if (data.actionType === "REPLACE") {
+        oldVal = data.value;
+      }
     }
   });
   
@@ -2570,7 +2587,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const newVal = editor.getValue();
         const data = {
           clientId: clientId,
-          value: "",
+          value: newVal,
           patch: dmp.patch_make(oldVal, newVal),
           otherPos: editor.session.selection.toJSON(),
           actionType: "PATCH",
