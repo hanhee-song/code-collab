@@ -2506,6 +2506,10 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // CHANGE / CURSOR HANDLERS ===========================
   
+  // Internal rate limiter
+  let sendingPatch = false;
+  let sendingCursor = false;
+  
   let oldPos = editor.session.selection.toJSON();
   let oldVal = editor.getValue();
   
@@ -2541,27 +2545,41 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   
   function sendPatch() {
-    const newVal = editor.getValue();
-    const data = {
-      clientId: clientId,
-      value: newVal,
-      patch: dmp.patch_make(oldVal, newVal),
-      otherPos: editor.session.selection.toJSON(),
-      actionType: "PATCH",
-    };
-    oldVal = newVal;
-    channel.trigger('client-text-edit', data);
+    if (!sendingPatch) {
+      sendingPatch = true;
+      setTimeout(() => {
+        sendingPatch = false;
+        const newVal = editor.getValue();
+        const data = {
+          clientId: clientId,
+          value: newVal,
+          patch: dmp.patch_make(oldVal, newVal),
+          otherPos: editor.session.selection.toJSON(),
+          actionType: "PATCH",
+        };
+        oldVal = newVal;
+        channel.trigger('client-text-edit', data);
+      }, 110);
+    }
   }
   
   function sendCursor() {
-    const data = {
-      clientId: clientId,
-      value: "", // if these cause an error,
-      patch: "", // you're doing something wrong
-      otherPos: editor.session.selection.toJSON(),
-      actionType: "CURSOR",
-    };
-    channel.trigger('client-text-edit', data);
+    if (!sendingPatch || !sendingCursor) {
+      sendingCursor = true;
+      setTimeout(() => {
+        sendingCursor = false;
+        if (!sendingPatch) {
+          const data = {
+            clientId: clientId,
+            value: "", // if these cause an error,
+            patch: "", // you're doing something wrong
+            otherPos: editor.session.selection.toJSON(),
+            actionType: "CURSOR",
+          };
+          channel.trigger('client-text-edit', data);
+        }
+      }, 110);
+    }
   }
   
   // INITIAL REQUEST ON LOAD ============================
