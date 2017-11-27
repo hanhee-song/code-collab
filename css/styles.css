@@ -60,7 +60,7 @@ table {
 .other-cursor-selection {
   height: 1em;
   background-color: #0d5;
-  position: relative;
+  position: absolute;
   z-index: 99;
   opacity: .05;
   top: 0;

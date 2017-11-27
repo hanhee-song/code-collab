@@ -112,7 +112,6 @@ document.addEventListener("DOMContentLoaded", () => {
           otherPos: editor.session.selection.toJSON(),
           actionType: "PATCH",
         };
-        console.log(data);
         oldVal = newVal;
         channel.trigger('client-text-edit', data);
       }, 110);

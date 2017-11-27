@@ -63,22 +63,29 @@ function applyEdits(patch, value, actionType) {
 
 // CALCULATING OTHER CURSOR =========================
 
-let heightScale;
-let widthScale;
+// let heightScale;
+// let widthScale;
+//
+// function getScale() {
+  // const cursor = document.querySelector('.ace_cursor');
+//   if (cursor) {
+    // heightScale = parseFloat(cursor.style.height);
+    // widthScale = parseFloat(cursor.style.width);
+//   } else {
+//     setTimeout(function () {
+//       getScale();
+//     }, 50);
+//   }
+// }
+//
+// getScale();
 
 function getScale() {
   const cursor = document.querySelector('.ace_cursor');
-  if (cursor) {
-    heightScale = parseFloat(cursor.style.height);
-    widthScale = parseFloat(cursor.style.width);
-  } else {
-    setTimeout(function () {
-      getScale();
-    }, 50);
-  }
+  const heightScale = parseFloat(cursor.style.height);
+  const widthScale = parseFloat(cursor.style.width);
+  return [heightScale, widthScale];
 }
-
-getScale();
 
 function clearOtherSelection(clientId) {
   let selection = document.querySelector(`.other-cursor-selection.${clientId}`);
@@ -96,6 +103,7 @@ function clearOtherCursor(clientId) {
 }
 
 function updateOtherCursor(otherPos, clientId) {
+  const [heightScale, widthScale] = getScale();
   let otherCursor = document.querySelector(`.other-cursor.${clientId}`);
   if (!otherCursor) {
     otherCursor = document.createElement("div");
@@ -108,6 +116,7 @@ function updateOtherCursor(otherPos, clientId) {
 }
 
 function updateOtherSelection(otherPos, clientId) {
+  const [heightScale, widthScale] = getScale();
   if (otherPos.start.row !== otherPos.end.row || otherPos.start.column !== otherPos.end.column) {
     let topPos;
     let botPos;
