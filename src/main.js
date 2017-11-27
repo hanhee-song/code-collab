@@ -65,8 +65,6 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (JSON.stringify(oldPos) !== JSON.stringify(newPos)) {
       // triggers if change from incoming data causes change in pos
       setTimeout(() => {
-        // BUG
-        // THIS SHOULD ONLY UPDATE CURSOR BUT IS UPDATING EVERYTHING
         sendCursor();
       }, 0);
       oldPos = newPos;
@@ -76,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
   editorEl.addEventListener("click", () => {
     // TODO: THIS DOESN'T TRIGGER WHEN MOUSE RELEASED OUTSIDE OF WINDOW
     setTimeout(function () {
-      sendPatch();
+      sendCursor();
     }, 0);
   });
   
@@ -84,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const newVal = editor.getValue();
     const newPos = editor.session.selection.toJSON();
     if (oldVal === newVal && JSON.stringify(oldPos) !== JSON.stringify(newPos)) {
-      sendPatch();
+      sendCursor();
     }
     oldPos = newPos;
   });
@@ -93,7 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const newVal = editor.getValue();
     const data = {
       clientId: clientId,
-      value: editor.getValue(),
+      value: newVal,
       patch: dmp.patch_make(oldVal, newVal),
       otherPos: editor.session.selection.toJSON(),
       actionType: "PATCH",
@@ -103,7 +101,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   
   function sendCursor() {
-    const newVal = editor.getValue();
     const data = {
       clientId: clientId,
       value: "", // if these cause an error,
@@ -129,10 +126,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // SEND CLOSE SIGNAL AND SAVE ON CLOSE =================
   
   window.addEventListener("beforeunload", () => {
+    const newVal = editor.getValue();
     const data = {
       clientId: clientId,
-      value: editor.getValue(),
-      patch: dmp.patch_make(oldVal, editor.getValue()),
+      value: newVal,
+      patch: dmp.patch_make(oldVal, newVal),
       otherPos: null,
       actionType: "REPLACE",
     };
@@ -140,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     Cookies.set(id, {
       clientId: clientId,
-      text: editor.getValue(),
+      text: newVal,
     });
   });
   
