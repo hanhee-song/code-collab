@@ -2474,6 +2474,8 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // GENERATE COOKIE / CLIENT ID =================
   
+  Cookies.remove(id);
+  
   let cookie = Cookies.getJSON(id);
   let clientId;
   if (cookie) {
@@ -2502,6 +2504,9 @@ document.addEventListener("DOMContentLoaded", () => {
   
   channel.bind('client-text-edit', (data) => {
     updateEditor(data);
+    if (data.actionType === "REPLACE") {
+      oldVal = data.value;
+    }
   });
   
   // CHANGE / CURSOR HANDLERS ===========================
@@ -2530,9 +2535,13 @@ document.addEventListener("DOMContentLoaded", () => {
   
   editorEl.addEventListener("click", () => {
     // TODO: THIS DOESN'T TRIGGER WHEN MOUSE RELEASED OUTSIDE OF WINDOW
-    setTimeout(function () {
-      sendCursor();
-    }, 0);
+    const newPos = editor.session.selection.toJSON();
+    if (JSON.stringify(oldPos) !== JSON.stringify(newPos)) {
+      setTimeout(function () {
+        sendCursor();
+      }, 0);
+    }
+    oldPos = newPos;
   });
   
   document.addEventListener("keyup", (e) => {
@@ -2543,6 +2552,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     oldPos = newPos;
   });
+  
+  // ACTIONTYPE SENDERS ========================
   
   function sendPatch() {
     if (!sendingPatch) {
@@ -2582,10 +2593,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
+  function sendReplace() {
+    const data = {
+      clientId: clientId,
+      value: editor.getValue(),
+      patch: "",
+      otherPos: editor.session.selection.toJSON(),
+      actionType: "REPLACE",
+    };
+    channel.trigger('client-text-edit', data);
+  }
+  
   // INITIAL REQUEST ON LOAD ============================
   
   channel.bind('client-text-receive', () => {
-    sendPatch();
+    sendReplace();
   });
   
   channel.bind('pusher:subscription_succeeded', () => {
@@ -2600,10 +2622,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const newVal = editor.getValue();
     const data = {
       clientId: clientId,
-      value: newVal,
-      patch: dmp.patch_make(oldVal, newVal),
+      value: "",
+      patch: "",
       otherPos: null,
-      actionType: "REPLACE",
+      actionType: "CURSOR",
     };
     channel.trigger('client-text-edit', data);
     
