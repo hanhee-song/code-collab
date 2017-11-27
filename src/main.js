@@ -139,25 +139,35 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   
   function sendReplace() {
+    const newVal = editor.getValue();
     const data = {
       clientId: clientId,
-      value: editor.getValue(),
+      value: newVal,
       patch: "",
       otherPos: editor.session.selection.toJSON(),
       actionType: "REPLACE",
     };
+    oldVal = newVal;
     channel.trigger('client-text-edit', data);
   }
   
   // INITIAL REQUEST ON LOAD ============================
   
-  channel.bind('client-text-receive', () => {
+  channel.bind('client-text-replace', (data) => {
+    updateEditor(data);
     sendReplace();
   });
   
   channel.bind('pusher:subscription_succeeded', () => {
+    const data = {
+      clientId: clientId,
+      value: "", // if these cause an error,
+      patch: "", // you're doing something wrong
+      otherPos: editor.session.selection.toJSON(),
+      actionType: "CURSOR",
+    };
     setTimeout(function () {
-      channel.trigger('client-text-receive', "asdf");
+      channel.trigger('client-text-replace', data);
     }, 0);
   });
   
