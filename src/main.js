@@ -107,11 +107,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const newVal = editor.getValue();
         const data = {
           clientId: clientId,
-          value: newVal,
+          value: "",
           patch: dmp.patch_make(oldVal, newVal),
           otherPos: editor.session.selection.toJSON(),
           actionType: "PATCH",
         };
+        console.log(data);
         oldVal = newVal;
         channel.trigger('client-text-edit', data);
       }, 110);

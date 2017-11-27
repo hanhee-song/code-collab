@@ -8,7 +8,7 @@ const dmp = new dmpmod.diff_match_patch();
 
 function updateEditor({ clientId, value, patch, otherPos, actionType }) {
   const editor = ace.edit("editor");
-  if (actionType !== "CURSOR" && editor.getValue() !== value) {
+  if (actionType !== "CURSOR") {
     applyEdits(patch, value, actionType);
   }
   // always clear selection

@@ -2320,7 +2320,7 @@ const dmp = new dmpmod.diff_match_patch();
 
 function updateEditor({ clientId, value, patch, otherPos, actionType }) {
   const editor = ace.edit("editor");
-  if (actionType !== "CURSOR" && editor.getValue() !== value) {
+  if (actionType !== "CURSOR") {
     applyEdits(patch, value, actionType);
   }
   // always clear selection
@@ -2561,11 +2561,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const newVal = editor.getValue();
         const data = {
           clientId: clientId,
-          value: newVal,
+          value: "",
           patch: dmp.patch_make(oldVal, newVal),
           otherPos: editor.session.selection.toJSON(),
           actionType: "PATCH",
         };
+        console.log(data);
         oldVal = newVal;
         channel.trigger('client-text-edit', data);
       }, 110);
