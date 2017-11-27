@@ -2437,6 +2437,7 @@ function updateOtherSelection(otherPos, clientId) {
       selection.className = `other-cursor-selection ${clientId}`;
       selection.style.top = i * heightScale + 'px';
       selection.style.left = i === topPos.row ? 5 + topPos.column * widthScale + 'px' : '4px';
+      selection.style.height = heightScale + 'px';
       if (i === botPos.row) {
         const width = i === topPos.row ? botPos.column - topPos.column : botPos.column;
         selection.style.width = width * widthScale + 'px';
@@ -2529,7 +2530,6 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         sendCursor();
       }, 0);
-      oldPos = newPos;
     }
   });
   
@@ -2541,7 +2541,6 @@ document.addEventListener("DOMContentLoaded", () => {
         sendCursor();
       }, 0);
     }
-    oldPos = newPos;
   });
   
   document.addEventListener("keyup", (e) => {
@@ -2550,7 +2549,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (oldVal === newVal && JSON.stringify(oldPos) !== JSON.stringify(newPos)) {
       sendCursor();
     }
-    oldPos = newPos;
   });
   
   // ACTIONTYPE SENDERS ========================
@@ -2575,6 +2573,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   
   function sendCursor() {
+    oldPos = editor.session.selection.toJSON();
     if (!sendingPatch || !sendingCursor) {
       sendingCursor = true;
       setTimeout(() => {

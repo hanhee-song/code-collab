@@ -76,7 +76,6 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         sendCursor();
       }, 0);
-      oldPos = newPos;
     }
   });
   
@@ -88,7 +87,6 @@ document.addEventListener("DOMContentLoaded", () => {
         sendCursor();
       }, 0);
     }
-    oldPos = newPos;
   });
   
   document.addEventListener("keyup", (e) => {
@@ -97,7 +95,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (oldVal === newVal && JSON.stringify(oldPos) !== JSON.stringify(newPos)) {
       sendCursor();
     }
-    oldPos = newPos;
   });
   
   // ACTIONTYPE SENDERS ========================
@@ -122,6 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   
   function sendCursor() {
+    oldPos = editor.session.selection.toJSON();
     if (!sendingPatch || !sendingCursor) {
       sendingCursor = true;
       setTimeout(() => {

@@ -62,7 +62,7 @@ table {
   background-color: #0d5;
   position: absolute;
   z-index: 99;
-  opacity: .2;
+  opacity: .05;
   top: 0;
   left: 0;
 }

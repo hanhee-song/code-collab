@@ -125,6 +125,7 @@ function updateOtherSelection(otherPos, clientId) {
       selection.className = `other-cursor-selection ${clientId}`;
       selection.style.top = i * heightScale + 'px';
       selection.style.left = i === topPos.row ? 5 + topPos.column * widthScale + 'px' : '4px';
+      selection.style.height = heightScale + 'px';
       if (i === botPos.row) {
         const width = i === topPos.row ? botPos.column - topPos.column : botPos.column;
         selection.style.width = width * widthScale + 'px';
